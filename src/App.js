@@ -1,142 +1,91 @@
 
 import './App.css';
+// import list of names
 import data from './names';
-import {useState} from 'react';
-import ReactDOM from 'react-dom';
+import { useState } from 'react';
 
-
+// import the List component
+import List from './List'
 
 function App() {
 
-  const [list, setList] = useState(displayData);
+  const [list, setList] = useState(data.names);
+  const [title, setTitle] = useState('Unordered List')
 
-
-  // using reduce() to calculate amount of names in the array
-  const totalNames = data.names.reduce((amountOfNames, amountOfName) => amountOfNames + amountOfName.amount, 0)
-  console.log(totalNames)
-
-  function displayData() {
-    console.log("hi")
-    
-    return (
-      <div>
-        <div>
-          <h2>Unordered List</h2>
-        </div>
-        <div className="names">
-          <table>
-            <tbody>
-              <tr>
-                <th>Name</th>
-                <th>Amount</th>
-              </tr>
-              {data.names.map((item, i) => (
-              <tr key={i}>
-                <td>{item.name}</td>
-                <td>{item.amount}</td>
-              </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    )
+  // using reducer to calculate the amount of all names
+  function reducer(namesInTotal, amountOfName) {
+    return namesInTotal + amountOfName.amount
   }
 
-  function orderedByAmounts() {
-  // Order names by amounts and list output onto UI
-    console.log("orderedlist")
+  // using reduce() to calculate amount of names in the array
+  const totalNames = data.names.reduce(reducer, 0)
 
-    data.names.sort(function(a,b) {
+
+  // Order list by amount of names
+  function orderedByAmounts() {
+
+    // copy name list to another variable
+    let listCopy = [...data.names]
+
+    // using sort to order the names in the wanted way
+    listCopy.sort(function(a,b) {
       if(a.amount < b.amount) { return 1;}
       if(a.amount > b.amount) { return -1;}
       return 0;
     })
 
-    const orderAmount = (
-      <div>
-        <div>
-          <h2>Ordered by amount</h2>
-        </div>
-        <div className="names">
-          <table>
-            <tbody>
-              <tr>
-                <th>Name</th>
-                <th>Amount</th>
-              </tr>
-              {data.names.map((item, i) => (
-                <tr key={i}>
-                  <td>{item.name}</td>
-                  <td>{item.amount}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-    )
-    ReactDOM.render(orderAmount, document.getElementById('list'));
+    // setting new states for the variables
+    setList(listCopy)
+    setTitle("Ordered by amount")
   }
-  function orderedAplhabetically() {
-    // Order names in an alphabetical order and output onto UI
-    console.log("aplhabetically")
 
-    data.names.sort(function(a,b) {
+  // Order list in an alphabetical order
+  function orderedAlphabetically() {
+
+    // copy name list to another variable
+    let listCopy = [...data.names]
+
+    // using sort to order the names in the wanted way
+    listCopy.sort(function(a,b) {
       if(a.name < b.name) { return -1;}
       if(a.name > b.name) { return 1;}
       return 0;
     })
 
-    const orderAplha = (
-      <div>
-        <div>
-          <h2>Ordered Aplhabetically</h2>
-        </div>
-        <div className="names">
-          <table>
-            <tbody>
-              <tr>
-                <th>Name</th>
-                <th>Amount</th>
-              </tr>
-              {data.names.map((item, i) => (
-                <tr key={i}>
-                  <td>{item.name}</td>
-                  <td>{item.amount}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-    )
-    ReactDOM.render(orderAplha, document.getElementById('list'));
+    // setting new states for the variables
+    setList(listCopy)
+    setTitle("Ordered alphabetically")
   }
 
-  function searchForName() {
-    console.log("lookup name")
+  // Using event as a parameter to prevent default reload of page
+  function searchForName(event) {
+    event.preventDefault()
 
+    // save input value into a variable
     const inputName = document.getElementsByName("name")[0].value
 
-    console.log(inputName)
+    // using data.names to compare name to original list of names
+    // copy name list to another variable
+    let listCopy = [...data.names]
 
-    for(var i = 0; i < data.names.length; i++){
-      
-      if(inputName === "Susanna"){
-        console.log("HAIIII")
-      }else {
-        console.log("Name not found")
-      }
-    }
+    // using filter to look for wanted names from list
+    // listCopy is an array
+    listCopy = listCopy.filter(item => item.name.toLowerCase().includes(inputName.toLowerCase()))
+
+    // alert pops up when name not found in the list
+    if (listCopy.length === 0) {
+      alert("Name " + inputName + " not found.")
+    } 
+
+    // setting new states for the variables
+    setList(listCopy)
+    setTitle("Name searched: " + inputName)
   }
 
   return (
     <div>
       <div className="header">
-        <h1>Most popular names at <span>Solita</span></h1>
+        <h1>Most popular names at <span><br/>Solita</span></h1>
       </div>
       <div className="nameAmount">
         <h3>Names in total: {totalNames}</h3>
@@ -150,16 +99,20 @@ function App() {
         >Order by amount</button>
         <p>or</p>
         <button
-          onClick={orderedAplhabetically}
-        >Order aplhabetically</button>
+          onClick={orderedAlphabetically}
+        >Order alphabetically</button>
       </div>
-      <div>
-          <label>Name:</label>
-          <input placeholder="Search for name..." type="text" name="name" />
-          <button onClick={searchForName}>Search</button>
+      <div className="searchbar">
+        <p>Or search by name</p>
+        <form className="inputform" onSubmit={searchForName}>
+            <label>Name:</label>
+            <input placeholder="Search for name..." type="text" name="name" />
+            <input type="submit" value="Search" />
+        </form>
       </div>
       <div className="list" id="list">
-        {list}
+        {/* Using List component*/}
+        <List table={list} title={title} />
       </div>
     </div>
   );
